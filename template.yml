@@ -13,11 +13,14 @@ Parameters:
   Stage:
     Type: String
     Description: The name for a project pipeline stage, such as Staging or Prod, for which resources are provisioned and deployed.
-    Default: ''
+    Default: 'dev'
 
 Globals:
   Function:
     AutoPublishAlias: live
+    Layers:
+       - !Ref DependenciesLayer
+    Runtime: nodejs12.x
     DeploymentPreference:
       Enabled: true
       Type: Canary10Percent5Minutes
@@ -28,8 +31,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'awscodestar-${ProjectId}-lambda-HelloWorld'
+      CodeUri: src/hello-func/
       Handler: index.handler
-      Runtime: nodejs12.x
       Environment:
         Variables:
           NODE_ENV: production
@@ -48,6 +51,19 @@ Resources:
           Properties:
             Path: /
             Method: post
+        DependenciesEvent:
+          Type: Api
+          Properties:
+            Path: /temp
+            Method: get
+  
+  DependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: dependencies-layer
+      Description: layer for common dependencies code
+      ContentUri: dependencies-layer
+
   LambdaExecutionRole:
     Description: Creating service role in IAM for AWS Lambda
     Type: AWS::IAM::Role

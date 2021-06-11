@@ -7,7 +7,9 @@ phases:
     commands:
       # Install dependencies needed for running tests
       - npm install
-
+      - mkdir -p ./dependencies-layer/nodejs
+      - mv ./node_modules ./dependencies-layer/nodejs
+    
       # Upgrade AWS CLI to the latest version
       - pip install --upgrade awscli
   pre_build:
